@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Button, Text } from 'react-native';
+import { View, Button, Text, Image } from 'react-native';
 import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication';
 import { signInWithApple, getBeastProfile, updateBeastProfile } from '../api/apiService';
 import { Beast } from '../types';
@@ -10,16 +10,14 @@ const AuthScreen = () => {
 
   const onAppleButtonPress = async () => {
     try {
-        console.log('Apple Auth Request');
       const appleAuthRequestResponse = await appleAuth.performRequest({
         requestedOperation: appleAuth.Operation.LOGIN,
         requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
       });
-      console.log('Apple Auth Response');
-      console.log(appleAuthRequestResponse);
-
 
       const credentialState = await appleAuth.getCredentialStateForUser(appleAuthRequestResponse.user);
+
+      
 
       if (credentialState === appleAuth.State.AUTHORIZED) {
         const { identityToken } = appleAuthRequestResponse;
@@ -39,7 +37,6 @@ const AuthScreen = () => {
     if (user) {
       try {
         const profile = await getBeastProfile(user.id);
-        console.log('Profile:', profile);
       } catch (error) {
         setError('Failed to fetch profile');
       }
@@ -50,7 +47,6 @@ const AuthScreen = () => {
     if (user) {
       try {
         const updatedProfile = await updateBeastProfile(user.id, { gamerTag: 'UpdatedTag' });
-        console.log('Updated Profile:', updatedProfile);
       } catch (error) {
         setError('Failed to update profile');
       }
@@ -58,9 +54,9 @@ const AuthScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Welcome</Text>
-        <AppleButton
+    <View style={{ flex:2, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color:"white", fontSize: 24, fontWeight: 'bold' }}>{`${user ? `Preeesh, ${user.gamerTag}!` : 'Welcome'}`}</Text>
+          {!user && <AppleButton
         buttonStyle={AppleButton.Style.DEFAULT}
         buttonType={AppleButton.Type.SIGN_IN}
         style={{
@@ -69,9 +65,11 @@ const AuthScreen = () => {
         }}
         onPress={() => onAppleButtonPress()}
       />
+    }
       {user && (
         <>
-          <Text>Welcome, {user.gamerTag}!</Text>
+        <Image source={require('../../assets/griddy.gif')} />
+
           <Button title="Fetch Profile" onPress={fetchProfile} />
           <Button title="Update Profile" onPress={updateProfile} />
         </>
